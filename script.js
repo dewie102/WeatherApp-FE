@@ -1,41 +1,47 @@
+// Get weatherApp cookies
+const cookieValue = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("weatherAppCookie="))
+  ?.split("=")[1];
+
 // Generate the list of previously searched zip codes
-(function previouslySearched() {
-  // Change the previouslySearched array to a cookie read to get the list of searched locations
-  const previouslySearched = [78840, 78840, 78840, 78840, 78840, 78840, 78840];
+let previouslySearched = function previouslySearched() {
+  let previouslySearched = cookieValue.split(",");
 
   const previouslySearchedDiv = document.getElementById(
     "previouslySearchedDiv"
   );
-
+  previouslySearchedDiv.replaceChildren();
+  previouslySearchedDiv.appendChild(document.createElement("h6"));
+  previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
   for (let element of previouslySearched) {
     let newLocation = document.createElement("a");
     newLocation.classList.add("text-decoration-none");
     newLocation.classList.add("search-history");
-    newLocation.href = "";
+    newLocation.value = element;
+    newLocation.onclick = function () {
+      // TODO: make a call to the function that gets the new location from the weather api
+    };
     newLocation.textContent = element;
     previouslySearchedDiv.appendChild(newLocation);
   }
-})();
+};
 
 // event listener that checks the location search field
 locationSearch.addEventListener("keypress", (e) => {
   let searchValue = document.getElementById("locationSearch").value;
 
   if (e.key === "Enter") {
-    console.log(searchValue);
+    if (!cookieValue) {
+      console.log(cookieValue);
+      document.cookie = `weatherAppCookie=${searchValue}`;
+    } else {
+      console.log(cookieValue);
+
+      document.cookie = `weatherAppCookie=${searchValue},${cookieValue}`;
+    }
+    previouslySearched;
   }
 });
 
-// function that gets the weatherAppCookie
-function getWeatherAppCookie() {
-  document.cookie = "weatherAppCookie=99999";
-  // document.cookie = "weatherAppCookie=";
-
-  // get cookie list
-  let weatherAppCookie = document.cookie
-    .split(";")
-    .find((row) => row.startsWith("weatherAppCookie="))
-    ?.split("=")[1];
-
-  return weatherAppCookie;
-}
+window.onload = previouslySearched;
