@@ -39,9 +39,60 @@ locationSearch.addEventListener("keypress", (e) => {
       console.log(cookieValue);
 
       document.cookie = `weatherAppCookie=${searchValue},${cookieValue}`;
+
+      getLocationFromZip(searchValue);
     }
     previouslySearched;
   }
 });
 
 window.onload = previouslySearched;
+
+function getLocationFromZip(zipcode) {
+  try {
+    fetch(
+      `http://localhost:3000/api/weatherapp/openweather/zip?zipcode=${zipcode}`
+    )
+      .then((res) => res.json())
+      .then((content) => {
+        if (Object.hasOwn(content, "error")) {
+          console.log(content.error);
+          return content;
+        }
+
+        return content;
+      })
+      .then(processReturnedLocationValue);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function processReturnedLocationValue(locationValue) {
+  if (Object.hasOwn(locationValue, "error")) {
+    alert(locationValue.error);
+    return;
+  }
+
+  if (!locationValue.lat && !locationValue.lon) {
+    console.log("Something went wrong, we don't have both values");
+    return;
+  }
+
+  saveLonAndLatToLocalStorage({
+    lat: locationValue.lat,
+    lon: locationValue.lon,
+  });
+}
+
+function saveLonAndLatToLocalStorage({ lat, lon }) {
+  localStorage.setItem("lat", lat);
+  localStorage.setItem("lon", lon);
+}
+
+function getLonAndLatFromLocalStorage() {
+  const lat = localStorage.getItem("lat");
+  const lon = localStorage.getItem("lon");
+
+  return { lat, lon };
+}
