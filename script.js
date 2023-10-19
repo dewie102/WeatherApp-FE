@@ -1,3 +1,5 @@
+let PlacesService;
+
 // Get weatherApp cookies
 const cookieValue = document.cookie
   .split("; ")
@@ -114,6 +116,28 @@ function getLonAndLatFromLocalStorage() {
   const lon = localStorage.getItem("lon");
 
   return { lat, lon };
+}
+
+async function initPlaces() {
+  PlacesService = await google.maps.importLibrary("places");
+
+  const options = {
+    componentRestrictions: { country: "us" },
+    fields: ["address_components", "geometry", "icon", "name"],
+  };
+
+  const autocomplete = new PlacesService.Autocomplete(
+    document.getElementById("locationSearch"),
+    options
+  );
+
+  google.maps.event.addListener(autocomplete, "place_changed", () => {
+    let place = autocomplete.getPlace();
+    console.log(place);
+    console.log(place.geometry.location);
+    console.log(place.geometry.location.lat());
+    console.log(place.geometry.location.lng());
+  });
 }
 
 // get current weather (Only returns the current weather)
