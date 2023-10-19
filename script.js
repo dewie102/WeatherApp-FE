@@ -16,9 +16,24 @@ if (isLoggedIn) {
   newFavorite.classList.add("img-thumbnail");
   newFavorite.style.margin = "5px";
   favoritesDiv.appendChild(newFavorite);
+
+  let navButton = document.createElement("button");
+  navButton.classList.add("btn");
+  navButton.classList.add("btn-outline-warning");
+  navButton.type = "submit";
+  navButton.textContent = "Log Off";
+  navBarButton.appendChild(navButton);
+} else {
+  favoritesDiv.style.display = "none";
+  let navButton = document.createElement("button");
+  navButton.classList.add("btn");
+  navButton.classList.add("btn-outline-warning");
+  navButton.type = "submit";
+  navButton.textContent = "Login";
+  navBarButton.appendChild(navButton);
 }
 // Generate the list of previously searched zip codes
-let previouslySearched = function previouslySearched() {
+function previouslySearched() {
   let previouslySearched = cookieValue.split(",");
 
   const previouslySearchedDiv = document.getElementById(
@@ -38,80 +53,30 @@ let previouslySearched = function previouslySearched() {
     newLocation.textContent = element;
     previouslySearchedDiv.appendChild(newLocation);
   }
-};
+}
 
 // event listener that checks the location search field
 locationSearch.addEventListener("keypress", (e) => {
-  console.log("test");
   let searchValue = document.getElementById("locationSearch");
 
   if (e.key === "Enter") {
-    const locationSearch = getLocationFromZip(searchValue.value);
+    const locationSearch = getLonAndLatFromLocalStorage();
+    console.log(locationSearch.name);
     if (!cookieValue && locationSearch !== undefined) {
-      document.cookie = `weatherAppCookie=${searchValue.value}`;
+      document.cookie = `weatherAppCookie=${locationSearch.name}`;
     } else if (locationSearch !== undefined) {
-      if (!cookieValue.includes(searchValue.value)) {
-        document.cookie = `weatherAppCookie=${searchValue.value},${cookieValue}`;
+      if (!cookieValue.includes(locationSearch.name)) {
+        document.cookie = `weatherAppCookie=${locationSearch.name},${cookieValue}`;
       }
     }
     getCurrentWeather();
     getAirPollution();
+    getWeatherAlerts();
+    previouslySearched();
+    let forecastTitle = document.getElementById("forecastTitle");
+    forecastTitle.innerHTML = `${locationSearch.name} Forecast`;
   }
 });
-
-// get location from zipcode
-function getLocationFromZip(zipcode) {
-  try {
-    fetch(
-      `http://localhost:3000/api/weatherapp/openweather/zip?zipcode=${zipcode}`
-    )
-      .then((res) => res.json())
-      .then((content) => {
-        if (Object.hasOwn(content, "error")) {
-          console.log(content.error);
-          return content;
-        }
-
-        return content;
-      })
-      .then(processReturnedLocationValue);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-// process the returned location value
-function processReturnedLocationValue(locationValue) {
-  if (Object.hasOwn(locationValue, "error")) {
-    alert(locationValue.error);
-    return;
-  }
-
-  console.log(locationValue);
-  if (!locationValue.lat && !locationValue.lon) {
-    console.log("Something went wrong, we don't have both values");
-    return;
-  }
-
-  saveLonAndLatToLocalStorage({
-    lat: locationValue.lat,
-    lon: locationValue.lon,
-  });
-}
-
-// save lon and lat to local storage
-function saveLonAndLatToLocalStorage({ lat, lon }) {
-  localStorage.setItem("lat", lat);
-  localStorage.setItem("lon", lon);
-}
-
-// get lon and lat from local storage
-function getLonAndLatFromLocalStorage() {
-  const lat = localStorage.getItem("lat");
-  const lon = localStorage.getItem("lon");
-
-  return { lat, lon };
-}
 
 async function initPlaces() {
   PlacesService = await google.maps.importLibrary("places");
@@ -128,22 +93,39 @@ async function initPlaces() {
 
   google.maps.event.addListener(autocomplete, "place_changed", () => {
     let place = autocomplete.getPlace();
-    console.log(place);
-    console.log(place.geometry.location);
-    console.log(place.geometry.location.lat());
-    console.log(place.geometry.location.lng());
+    saveLonAndLatToLocalStorage({
+      lat: place.geometry.location.lat(),
+      lon: place.geometry.location.lng(),
+      name: place.name,
+    });
   });
+}
+
+function saveLonAndLatToLocalStorage({ lat, lon, name }) {
+  localStorage.setItem("lat", lat);
+  localStorage.setItem("lon", lon);
+  localStorage.setItem("name", name);
+}
+
+// get lon and lat from local storage
+function getLonAndLatFromLocalStorage() {
+  const lat = localStorage.getItem("lat");
+  const lon = localStorage.getItem("lon");
+  const name = localStorage.getItem("name");
+
+  return { lat, lon, name };
 }
 
 // get current weather (Only returns the current weather)
 async function getCurrentWeather() {
-  const { lat, lon } = await getLonAndLatFromLocalStorage();
-
+  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
   const response = await fetch(
     `http://localhost:3000/api/weatherapp/openweather?lat=${lat}&lon=${lon}`
   );
   const data = await response.json();
-  createWeatherCard(data);
+  createWeatherCard([data[0]]);
+  let forecastTitle = document.getElementById("forecastTitle");
+  forecastTitle.innerHTML = `${name} Forecast`;
 }
 
 // get air pollution
@@ -168,27 +150,28 @@ async function getAirPollution() {
 
 // create weather card
 function createWeatherCard(content) {
-  let weatherCard = document.createElement("div");
-  weatherCard.classList.add("card");
-  weatherCard.style.width = "18rem";
-  let weatherCardImg = document.createElement("img");
-  weatherCardImg.classList.add("card-img-top");
-  weatherCardImg.src = content.iconUrl;
-  weatherCardImg.alt = "weather icon";
-  weatherCard.appendChild(weatherCardImg);
-  let mainWeatherDiv = document.getElementById("mainWeatherDiv");
   mainWeatherDiv.replaceChildren();
-
-  let weatherCardBody = document.createElement("div");
-  weatherCardBody.classList.add("card-body");
-  weatherCardBody.innerHTML = `
-  <hr/>
-  <p>Temp: ${content.temp}</p>
-  <p>Wind Speed: ${content.windSpeed}</p>
-  <p>Humidity: ${content.humidity}</p>
-  `;
-  weatherCard.appendChild(weatherCardBody);
-  mainWeatherDiv.appendChild(weatherCard);
+  for (let element of content) {
+    let weatherCard = document.createElement("div");
+    weatherCard.classList.add("card");
+    weatherCard.style.width = "18rem";
+    let weatherCardImg = document.createElement("img");
+    weatherCardImg.classList.add("card-img-top");
+    weatherCardImg.src = element.iconUrl;
+    weatherCardImg.alt = "weather icon";
+    weatherCard.appendChild(weatherCardImg);
+    let mainWeatherDiv = document.getElementById("mainWeatherDiv");
+    let weatherCardBody = document.createElement("div");
+    weatherCardBody.classList.add("card-body");
+    weatherCardBody.innerHTML = `
+    <hr/>
+    <p>Temp: ${element.temp}</p>
+    <p>Wind Speed: ${element.windSpeed}</p>
+    <p>Humidity: ${element.humidity}</p>
+    `;
+    weatherCard.appendChild(weatherCardBody);
+    mainWeatherDiv.appendChild(weatherCard);
+  }
 }
 
 async function getWeatherAlerts() {
@@ -218,6 +201,19 @@ async function getWeatherAlerts() {
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
     });
+}
+
+async function getHourlyForecast() {
+  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
+  console.log(lat, lon, name);
+  const response = await fetch(
+    `http://localhost:3000/api/weatherapp/openweather/forecast?lat=${lat}&lon=${lon}&count=10`
+  );
+  const data = await response.json();
+  createWeatherCard(data);
+  console.log(data);
+  let forecastTitle = document.getElementById("forecastTitle");
+  forecastTitle.innerHTML = `${name} Forecast`;
 }
 
 // function pollutionChart(pollution) {
@@ -256,6 +252,6 @@ async function getWeatherAlerts() {
 //   }
 // }
 
-// window.onload = previouslySearched;
+window.onload = previouslySearched();
 
 window.onload = getWeatherAlerts();
