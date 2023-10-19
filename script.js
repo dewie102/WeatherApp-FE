@@ -1,4 +1,5 @@
 let PlacesService;
+let backendURL = "https://weatherapp-085g.onrender.com";
 
 // Get weatherApp cookies
 const cookieValue = document.cookie
@@ -10,13 +11,14 @@ let isLoggedIn = true;
 
 // TODO: if logged in get and display the favorites and place them in the favoritesDiv div
 if (isLoggedIn) {
-  let newFavorite = document.createElement("img");
-  newFavorite.src = "https://via.placeholder.com/150";
-  newFavorite.alt = "Favorite";
-  newFavorite.classList.add("img-thumbnail");
-  newFavorite.style.margin = "5px";
-  favoritesDiv.appendChild(newFavorite);
+  let newFavorite = `<div id="openweathermap-widget-17"></div>`;
 
+  // newFavorite.src = "https://via.placeholder.com/150";
+  // newFavorite.alt = "Favorite";
+  // newFavorite.classList.add("img-thumbnail");
+  // newFavorite.style.margin = "5px";
+
+  favoritesDiv.insertAdjacentHTML("beforeend", newFavorite);
   let navButton = document.createElement("button");
   navButton.classList.add("btn");
   navButton.classList.add("btn-outline-warning");
@@ -34,7 +36,12 @@ if (isLoggedIn) {
 }
 // Generate the list of previously searched zip codes
 function previouslySearched() {
-  let previouslySearched = cookieValue.split(",");
+  let currentCookies = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("weatherAppCookie="))
+    ?.split("=")[1];
+
+  let previouslySearched = currentCookies.split(",");
 
   const previouslySearchedDiv = document.getElementById(
     "previouslySearchedDiv"
@@ -43,13 +50,17 @@ function previouslySearched() {
   previouslySearchedDiv.appendChild(document.createElement("h6"));
   previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
   for (let element of previouslySearched) {
-    let newLocation = document.createElement("a");
-    newLocation.classList.add("text-decoration-none");
+    let newLocation = document.createElement("button");
+    newLocation.classList.add("btn");
+    // newLocation.style.border = "solid";
+    newLocation.style.marginTop = "-10px";
+    newLocation.style.marginRight = "-4px";
+    newLocation.style.padding = "3px";
+    newLocation.onclick = `${console.log("test")}`;
+    newLocation.classList.add("text-decoration-underline");
     newLocation.classList.add("search-history");
     newLocation.value = element;
-    newLocation.onclick = function () {
-      // TODO: make a call to the function that gets the new location from the weather api
-    };
+    newLocation.setAttribute("onclick", "getCurrentWeather()");
     newLocation.textContent = element;
     previouslySearchedDiv.appendChild(newLocation);
   }
@@ -120,7 +131,7 @@ function getLonAndLatFromLocalStorage() {
 async function getCurrentWeather() {
   const { lat, lon, name } = await getLonAndLatFromLocalStorage();
   const response = await fetch(
-    `http://localhost:3000/api/weatherapp/openweather?lat=${lat}&lon=${lon}`
+    `${backendURL}/api/weatherapp/openweather?lat=${lat}&lon=${lon}`
   );
   const data = await response.json();
   createWeatherCard([data[0]]);
@@ -134,7 +145,7 @@ async function getAirPollution() {
   let airQualityDiv = document.getElementById("airQualityDiv");
 
   const response = await fetch(
-    `http://localhost:3000/api/weatherapp/openweather/airpollution?lat=${lat}&lon=${lon}`
+    `${backendURL}/api/weatherapp/openweather/airpollution?lat=${lat}&lon=${lon}`
   );
   const data = await response.json();
   let qualityText = document.createElement("h2");
@@ -175,7 +186,7 @@ function createWeatherCard(content) {
 }
 
 async function getWeatherAlerts() {
-  await fetch("http://localhost:3000/api/weatherapp/nationalalerts?count=10")
+  await fetch(`${backendURL}/api/weatherapp/nationalalerts?count=5`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -205,13 +216,11 @@ async function getWeatherAlerts() {
 
 async function getHourlyForecast() {
   const { lat, lon, name } = await getLonAndLatFromLocalStorage();
-  console.log(lat, lon, name);
   const response = await fetch(
-    `http://localhost:3000/api/weatherapp/openweather/forecast?lat=${lat}&lon=${lon}&count=10`
+    `${backendURL}/api/weatherapp/openweather/forecast?lat=${lat}&lon=${lon}&count=5`
   );
   const data = await response.json();
   createWeatherCard(data);
-  console.log(data);
   let forecastTitle = document.getElementById("forecastTitle");
   forecastTitle.innerHTML = `${name} Forecast`;
 }
@@ -255,3 +264,5 @@ async function getHourlyForecast() {
 window.onload = previouslySearched();
 
 window.onload = getWeatherAlerts();
+
+window.onload = getCurrentWeather();
