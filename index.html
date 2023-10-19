@@ -11,6 +11,20 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="styles.css" />
+    <!--TODO: check if the user is logged in if not direct them to the login page -->
+    <script>
+      //TODO: change to not "!" once the database is working
+      // Check if the user is logged in
+      if (localStorage.getItem("loggedIn")) {
+        // If not logged in, redirect to the login page
+        window.location.href = "login/loginPage.html";
+      }
+    </script>
+    <!-- <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script> -->
+    <!-- <script src="./javascript/pollutionChart.js"></script> -->
     <title>WeatherApp</title>
   </head>
   <body>
@@ -19,14 +33,6 @@
         <div class="container-fluid">
           <h4 class="navbar-brand pt-2" href="">WeatherApp</h4>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="#">Dashboard</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Maps</a>
-              </li>
-            </ul>
             <input
               id="locationSearch"
               class="form-control me-2 w-25"
@@ -43,7 +49,13 @@
       <div id="previouslySearchedDiv" class="m-3 d-flex">
         <!-- Generate an 'a' tag for each location in the user's cookies-->
       </div>
+      <div id="favoritesDiv" class="favoriteDiv">
+        <h1 class="text-center">Favorites</h1>
+        <hr />
+      </div>
       <div id="mainView" class="mainViewDiv">
+        <h1 class="text-center">Weather Forecast</h1>
+        <hr />
         <div class="row d-flex">
           <div class="col d-flex justify-content-center">
             <button
@@ -80,184 +92,15 @@
         </div>
         <div
           id="mainWeatherDiv"
-          class="row flex-row flex-nowrap overflow-auto m-4"
-        >
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-          <div class="card" style="width: 18rem">
-            <img
-              src="https://placehold.jp/100x100.png"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <p class="card-text">Temp:</p>
-              <p class="card-text">Wind Speed:</p>
-              <p class="card-text">Humidity:</p>
-            </div>
-          </div>
-        </div>
+          class="row flex-row flex-nowrap overflow-auto m-4 justify-content-center"
+        ></div>
       </div>
-      <div id="airQualityDiv" class="airQualityDiv">
-        <div>
-          <h1 class="text-center">Air Quality</h1>
-          <table class="table">
-            <hr />
-            <thead>
-              <tr>
-                <th scope="col">Location</th>
-                <th scope="col">co</th>
-                <th scope="col">no</th>
-                <th scope="col">no2</th>
-                <th scope="col">o3</th>
-                <th scope="col">so2</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Location #1</th>
-                <td>138.52</td>
-                <td>0</td>
-                <td>0.31</td>
-                <td>70.81</td>
-                <td>0.09</td>
-              </tr>
-              <tr>
-                <th scope="row">Location #2</th>
-                <td>138.52</td>
-                <td>0</td>
-                <td>0.31</td>
-                <td>70.81</td>
-                <td>0.09</td>
-              </tr>
-              <tr>
-                <th scope="row">Location #3</th>
-                <td>138.52</td>
-                <td>0</td>
-                <td>0.31</td>
-                <td>70.81</td>
-                <td>0.09</td>
-              </tr>
-            </tbody>
-          </table>
+      <div id="airPollutionDiv" class="airQualityDiv row">
+        <h1 class="text-center">Air Pollution</h1>
+        <hr />
+        <div id="airQualityDiv" class="col-4"></div>
+        <div id="airCategoryDiv" class="col-8">
+          <h1 class="text-center">Pollution Categories</h1>
         </div>
       </div>
       <div id="nationalAlertsDiv" class="nationalAlertsDiv">
@@ -328,6 +171,6 @@
       integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
       crossorigin="anonymous"
     ></script>
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
   </body>
 </html>
