@@ -1,3 +1,4 @@
+checkLogin();
 let PlacesService;
 let backendURL = "https://weatherapp-085g.onrender.com";
 
@@ -7,33 +8,33 @@ const cookieValue = document.cookie
   .find((row) => row.startsWith("weatherAppCookie="))
   ?.split("=")[1];
 
-let isLoggedIn = true;
+function checkLogin() {
+  loggedInCookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("weatherappLogin="))
+    ?.split("=")[1];
 
-// TODO: if logged in get and display the favorites and place them in the favoritesDiv div
-if (isLoggedIn) {
-  let newFavorite = `<div id="openweathermap-widget-17"></div>`;
-
-  // newFavorite.src = "https://via.placeholder.com/150";
-  // newFavorite.alt = "Favorite";
-  // newFavorite.classList.add("img-thumbnail");
-  // newFavorite.style.margin = "5px";
-
-  favoritesDiv.insertAdjacentHTML("beforeend", newFavorite);
-  let navButton = document.createElement("button");
-  navButton.classList.add("btn");
-  navButton.classList.add("btn-outline-warning");
-  navButton.type = "submit";
-  navButton.textContent = "Log Off";
-  navBarButton.appendChild(navButton);
-} else {
-  favoritesDiv.style.display = "none";
-  let navButton = document.createElement("button");
-  navButton.classList.add("btn");
-  navButton.classList.add("btn-outline-warning");
-  navButton.type = "submit";
-  navButton.textContent = "Login";
-  navBarButton.appendChild(navButton);
+  if (loggedInCookie === undefined) {
+    window.location.href = "./Login/loginPage.html";
+  }
 }
+
+let newFavorite = `<div id="openweathermap-widget-17"></div>`;
+
+// newFavorite.src = "https://via.placeholder.com/150";
+// newFavorite.alt = "Favorite";
+// newFavorite.classList.add("img-thumbnail");
+// newFavorite.style.margin = "5px";
+
+favoritesDiv.insertAdjacentHTML("beforeend", newFavorite);
+let navButton = document.createElement("button");
+navButton.classList.add("btn");
+navButton.classList.add("btn-outline-warning");
+navButton.type = "submit";
+navButton.setAttribute("onclick", "logOff()");
+navButton.textContent = "Log Off";
+navBarButton.appendChild(navButton);
+
 // Generate the list of previously searched zip codes
 function previouslySearched() {
   let currentCookies = document.cookie
@@ -41,28 +42,29 @@ function previouslySearched() {
     .find((row) => row.startsWith("weatherAppCookie="))
     ?.split("=")[1];
 
-  let previouslySearched = currentCookies.split(",");
-
-  const previouslySearchedDiv = document.getElementById(
-    "previouslySearchedDiv"
-  );
-  previouslySearchedDiv.replaceChildren();
-  previouslySearchedDiv.appendChild(document.createElement("h6"));
-  previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
-  for (let element of previouslySearched) {
-    let newLocation = document.createElement("button");
-    newLocation.classList.add("btn");
-    // newLocation.style.border = "solid";
-    newLocation.style.marginTop = "-10px";
-    newLocation.style.marginRight = "-4px";
-    newLocation.style.padding = "3px";
-    newLocation.onclick = `${console.log("test")}`;
-    newLocation.classList.add("text-decoration-underline");
-    newLocation.classList.add("search-history");
-    newLocation.value = element;
-    newLocation.setAttribute("onclick", "getCurrentWeather()");
-    newLocation.textContent = element;
-    previouslySearchedDiv.appendChild(newLocation);
+  if (currentCookies !== undefined) {
+    let previouslySearched = currentCookies.split(",");
+    const previouslySearchedDiv = document.getElementById(
+      "previouslySearchedDiv"
+    );
+    previouslySearchedDiv.replaceChildren();
+    previouslySearchedDiv.appendChild(document.createElement("h6"));
+    previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
+    for (let element of previouslySearched) {
+      let newLocation = document.createElement("button");
+      newLocation.classList.add("btn");
+      // newLocation.style.border = "solid";
+      newLocation.style.marginTop = "-10px";
+      newLocation.style.marginRight = "-4px";
+      newLocation.style.padding = "3px";
+      newLocation.onclick = `${console.log("test")}`;
+      newLocation.classList.add("text-decoration-underline");
+      newLocation.classList.add("search-history");
+      newLocation.value = element;
+      newLocation.setAttribute("onclick", "getCurrentWeather()");
+      newLocation.textContent = element;
+      previouslySearchedDiv.appendChild(newLocation);
+    }
   }
 }
 
@@ -70,14 +72,18 @@ function previouslySearched() {
 locationSearch.addEventListener("keypress", (e) => {
   let searchValue = document.getElementById("locationSearch");
 
+  let newCookieList = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("weatherAppCookie="))
+    ?.split("=")[1];
+
   if (e.key === "Enter") {
     const locationSearch = getLonAndLatFromLocalStorage();
-    console.log(locationSearch.name);
-    if (!cookieValue && locationSearch !== undefined) {
+    if (!newCookieList && locationSearch !== undefined) {
       document.cookie = `weatherAppCookie=${locationSearch.name}`;
     } else if (locationSearch !== undefined) {
-      if (!cookieValue.includes(locationSearch.name)) {
-        document.cookie = `weatherAppCookie=${locationSearch.name},${cookieValue}`;
+      if (!newCookieList.includes(locationSearch.name)) {
+        document.cookie = `weatherAppCookie=${locationSearch.name},${newCookieList}`;
       }
     }
     getCurrentWeather();
@@ -223,6 +229,12 @@ async function getHourlyForecast() {
   createWeatherCard(data);
   let forecastTitle = document.getElementById("forecastTitle");
   forecastTitle.innerHTML = `${name} Forecast`;
+}
+
+function logOff() {
+  document.cookie =
+    "weatherappLogin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  window.location.href = "./Login/loginPage.html";
 }
 
 // function pollutionChart(pollution) {
