@@ -10,17 +10,12 @@ let isLoggedIn = true;
 
 // TODO: if logged in get and display the favorites and place them in the favoritesDiv div
 if (isLoggedIn) {
-  const alerts = getWeatherAlerts();
-  console.log(alerts);
-  for (let element of alerts) {
-    console.log("loop");
-    let newFavorite = document.createElement("img");
-    newFavorite.src = "https://via.placeholder.com/150";
-    newFavorite.alt = "Favorite";
-    newFavorite.classList.add("img-thumbnail");
-    newFavorite.style.margin = "5px";
-    favoritesDiv.appendChild(newFavorite);
-  }
+  let newFavorite = document.createElement("img");
+  newFavorite.src = "https://via.placeholder.com/150";
+  newFavorite.alt = "Favorite";
+  newFavorite.classList.add("img-thumbnail");
+  newFavorite.style.margin = "5px";
+  favoritesDiv.appendChild(newFavorite);
 }
 // Generate the list of previously searched zip codes
 let previouslySearched = function previouslySearched() {
@@ -196,8 +191,8 @@ function createWeatherCard(content) {
   mainWeatherDiv.appendChild(weatherCard);
 }
 
-function getWeatherAlerts() {
-  fetch("http://localhost:3000/api/weatherapp/nationalalerts?count=10")
+async function getWeatherAlerts() {
+  await fetch("http://localhost:3000/api/weatherapp/nationalalerts?count=10")
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -205,8 +200,20 @@ function getWeatherAlerts() {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
-      return data;
+      for (let element of data) {
+        if (element.headline != null) {
+          let newTableRow = document.createElement("tr");
+          newTableRow.innerHTML = `
+          <td>${element.alertType}</td>
+          <td>${element.effective}</td>
+          <td>${element.expires}</td>
+  <td>${element.severity}</td>
+          <td>${element.headline}</td>
+          <td>${element.description}</td>
+          `;
+          alertTableBody.appendChild(newTableRow);
+        }
+      }
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
@@ -249,4 +256,6 @@ function getWeatherAlerts() {
 //   }
 // }
 
-window.onload = previouslySearched;
+// window.onload = previouslySearched;
+
+window.onload = getWeatherAlerts();
