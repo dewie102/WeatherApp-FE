@@ -8,7 +8,10 @@ let isLoggedIn = true;
 
 // TODO: if logged in get and display the favorites and place them in the favoritesDiv div
 if (isLoggedIn) {
-  for (let i = 0; i < 5; i++) {
+  const alerts = getWeatherAlerts();
+  console.log(alerts);
+  for (let element of alerts) {
+    console.log("loop");
     let newFavorite = document.createElement("img");
     newFavorite.src = "https://via.placeholder.com/150";
     newFavorite.alt = "Favorite";
@@ -169,9 +172,8 @@ function createWeatherCard(content) {
   mainWeatherDiv.appendChild(weatherCard);
 }
 
-(function getWeatherAlerts() {
-  // https://api.weather.gov/alerts/active
-  fetch("https://api.weather.gov/alerts/active")
+function getWeatherAlerts() {
+  fetch("http://localhost:3000/api/weatherapp/nationalalerts?count=10")
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -179,12 +181,13 @@ function createWeatherCard(content) {
       return response.json();
     })
     .then((data) => {
-      console.log(data.features);
+      console.log(data);
+      return data;
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
     });
-})();
+}
 
 // function pollutionChart(pollution) {
 //   google.charts.load("current", { packages: ["bar"] });
