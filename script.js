@@ -1,15 +1,10 @@
 checkLogin();
 let PlacesService;
 let backendURL = "https://weatherapp-085g.onrender.com";
-
-// Get weatherApp cookies
-const cookieValue = document.cookie
-  .split("; ")
-  .find((row) => row.startsWith("weatherAppCookie="))
-  ?.split("=")[1];
+// let backend = "http://localhost:3000";
 
 function checkLogin() {
-  loggedInCookie = document.cookie
+  let loggedInCookie = document.cookie
     .split("; ")
     .find((row) => row.startsWith("weatherappLogin="))
     ?.split("=")[1];
@@ -19,21 +14,100 @@ function checkLogin() {
   }
 }
 
-let newFavorite = `<div id="openweathermap-widget-17"></div>`;
+// Get weatherApp cookies
+const cookieValue = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("weatherAppCookie="))
+  ?.split("=")[1];
 
+// get favorite
+async function getFavorites() {
+  let userCookie = JSON.parse(
+    document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("weatherappLogin="))
+      ?.split("=")[1]
+  );
+
+  await fetch(
+    `${backendURL}/api/weatherapp/getfavorites?id=${userCookie.user.id}&token=${userCookie.token}`
+  )
+    .then((response) => response.json())
+    .then((content) => {
+      if (Object.hasOwn(content, "error")) {
+        return alert(`Failed to get the user's favorites`);
+      }
+      const favoriteList = content.favorites;
+      console.log(favoriteList);
+
+      for (let element of favoriteList) {
+        renderFavorites(element);
+
+        //         <div class="card" style="width: 18rem;">
+        //   <img class="card-img-top" src="..." alt="Card image cap">
+        //   <div class="card-body">
+        //     <h5 class="card-title">Card title</h5>
+        //     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        //     <a href="#" class="btn btn-primary">Go somewhere</a>
+        //   </div>
+        // </div>
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+console.log(getFavorites());
+
+function renderFavorites(element) {
+  let mainFavoriteDiv = document.getElementById("favoritesDiv");
+  console.log(element.lat);
+
+  fetch(
+    `${backendURL}/api/weatherapp/openweather?lat=${element.lat}&lon=${element.lon}`
+  )
+    .then((response) => response.json())
+    .then((content) => {
+      console.log(content);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
+  // let newFavorite = document.createElement("div");
+  // newFavorite.classList.add("card");
+  // newFavorite.style.width = "12rem";
+  // newFavorite.style.height = "20rem";
+  // let newFavoriteImg = document.createElement("img");
+  // newFavoriteImg.style.width = "12rem";
+  // newFavoriteImg.style.height = "10rem";
+
+  // newFavoriteImg.classList.add("card-img-top");
+  // newFavoriteImg.src = "https://placehold.jp/25x25.png";
+  // newFavoriteImg.alt = "Favorite";
+  // let innerFavoriteDiv = document.createElement("div");
+  // innerFavoriteDiv.classList.add("card-body");
+  // let favoriteTitle = document.createElement("h5");
+  // favoriteTitle.classList.add("card-title");
+  // favoriteTitle.textContent = element.locationName;
+  // let locationWeather = document.createElement("p");
+  // locationWeather.classList.add("card-text");
+  // locationWeather.textContent = "Temp: " + element.temperature + "°F";
+
+  // newFavorite.appendChild(newFavoriteImg);
+  // newFavorite.appendChild(innerFavoriteDiv);
+  // innerFavoriteDiv.appendChild(favoriteTitle);
+  // innerFavoriteDiv.appendChild(locationWeather);
+  // mainFavoriteDiv.appendChild(newFavorite);
+}
+// let newFavorite = document.createElement("img");
 // newFavorite.src = "https://via.placeholder.com/150";
 // newFavorite.alt = "Favorite";
 // newFavorite.classList.add("img-thumbnail");
 // newFavorite.style.margin = "5px";
-
-favoritesDiv.insertAdjacentHTML("beforeend", newFavorite);
-let navButton = document.createElement("button");
-navButton.classList.add("btn");
-navButton.classList.add("btn-outline-warning");
-navButton.type = "submit";
-navButton.setAttribute("onclick", "logOff()");
-navButton.textContent = "Log Off";
-navBarButton.appendChild(navButton);
+// newFavorite.style.width = "150px";
+// newFavorite.style.height = "150px";
+// document.getElementById("favoritesDiv").appendChild(newFavorite);
 
 // Generate the list of previously searched zip codes
 function previouslySearched() {
@@ -191,6 +265,7 @@ function createWeatherCard(content) {
   }
 }
 
+// get weather alerts
 async function getWeatherAlerts() {
   await fetch(`${backendURL}/api/weatherapp/nationalalerts?count=5`)
     .then((response) => {
@@ -220,6 +295,7 @@ async function getWeatherAlerts() {
     });
 }
 
+// get hourly forecast
 async function getHourlyForecast() {
   const { lat, lon, name } = await getLonAndLatFromLocalStorage();
   const response = await fetch(
@@ -231,50 +307,52 @@ async function getHourlyForecast() {
   forecastTitle.innerHTML = `${name} Forecast`;
 }
 
+// log of
 function logOff() {
   document.cookie =
     "weatherappLogin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   window.location.href = "./Login/loginPage.html";
 }
 
-// function pollutionChart(pollution) {
-//   google.charts.load("current", { packages: ["bar"] });
-//   google.charts.setOnLoadCallback(drawStuff);
+// save favorite
+async function saveFavorite() {
+  let userCookie = JSON.parse(
+    document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("weatherappLogin="))
+      ?.split("=")[1]
+  );
 
-//   function drawStuff() {
-//     var data = new google.visualization.arrayToDataTable([
-//       ["", "Percentage"],
-//       ["co", 138.52],
-//       ["np", 0],
-//       ["no2", 0.31],
-//       ["o3", 70.81],
-//       ["so2", 0.09],
-//       ["pm2_5", 10.44],
-//       ["pm10", 31.2],
-//       ["nh3", 0.58],
-//     ]);
+  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
 
-//     var options = {
-//       title: "Air Pollution",
-//       width: 900,
-//       legend: { position: "none" },
-//       chart: { title: "Air Pollution Chart" },
-//       bars: "horizontal", // Required for Material Bar Charts.
-//       axes: {
-//         x: {
-//           0: { side: "top", label: "" }, // Top x-axis.
-//         },
-//       },
-//       bar: { groupWidth: "90%" },
-//     };
+  let favoriteData = {
+    id: userCookie.user.id,
+    token: userCookie.token,
+    name: name,
+    lat: lat,
+    lon: lon,
+  };
+  await fetch(`${backendURL}/api/weatherapp/updatefavorites`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(favoriteData),
+  })
+    .then((response) => response.json())
+    .then((content) => {
+      if (Object.hasOwn(content, "error")) {
+        return alert(`Failed to add ${name} to favorites. ${content.error}`);
+      }
 
-//     var chart = new google.charts.Bar(document.getElementById("top_x_div"));
-//     chart.draw(data, options);
-//   }
-// }
+      alert(`Successfully added ${name} to favorites!`);
+      renderFavorites();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
 
 window.onload = previouslySearched();
-
 window.onload = getWeatherAlerts();
-
 window.onload = getCurrentWeather();
