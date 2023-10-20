@@ -1,8 +1,8 @@
 checkLogin();
 let chart;
 let PlacesService;
-// let backendURL = "https://weatherapp-085g.onrender.com";
-let backendURL = "http://localhost:3000";
+let backendURL = "https://weatherapp-085g.onrender.com";
+// let backendURL = "http://localhost:3000";
 
 function checkLogin() {
     let loggedInCookie = document.cookie
@@ -28,8 +28,9 @@ const cookieValue = document.cookie
     .find((row) => row.startsWith("weatherAppCookie="))
     ?.split("=")[1];
 
-function getLocationPhoto(location, htmlLocation) {
-    fetch(`${backendURL}/api/weatherapp/photo?location=${location}`)
+// get a photo for each favorite
+async function getLocationPhoto(location, htmlLocation) {
+    await fetch(`${backendURL}/api/weatherapp/photo?location=${location}`)
         .then((response) => response.json())
         .then((content) => {
             htmlLocation.src = content.url;
@@ -69,7 +70,6 @@ async function getFavorites() {
 
 function renderFavorites(element) {
     let mainFavoriteDiv = document.getElementById("favoritesDiv");
-    console.log(element);
 
     fetch(
         `${backendURL}/api/weatherapp/openweather?lat=${element.lat}&lon=${element.lon}`
@@ -130,7 +130,8 @@ function previouslySearched() {
         ?.split("=")[1];
 
     if (currentCookies !== undefined) {
-        let previouslySearched = currentCookies.split(",");
+        let formattedString = `[${currentCookies}]`;
+        let previouslySearched = JSON.parse(formattedString);
         const previouslySearchedDiv = document.getElementById(
             "previouslySearchedDiv"
         );
@@ -140,19 +141,33 @@ function previouslySearched() {
         for (let element of previouslySearched) {
             let newLocation = document.createElement("button");
             newLocation.classList.add("btn");
-            // newLocation.style.border = "solid";
             newLocation.style.marginTop = "-10px";
             newLocation.style.marginRight = "-4px";
             newLocation.style.padding = "3px";
-            newLocation.onclick = `${console.log("test")}`;
             newLocation.classList.add("text-decoration-underline");
             newLocation.classList.add("search-history");
-            newLocation.value = element;
-            newLocation.setAttribute("onclick", "getCurrentWeather()");
-            newLocation.textContent = element;
+            newLocation.value = `[{"name": "${element.name}", "lat": "${element.lat}", "lon": "${element.lon}"}]`;
+            newLocation.setAttribute(
+                `onclick`,
+                `searchPreviousOption(this.value)`
+            );
+            newLocation.textContent = element.name;
             previouslySearchedDiv.appendChild(newLocation);
         }
     }
+}
+
+function searchPreviousOption(value) {
+    let jsonValue = JSON.parse(value);
+    saveLonAndLatToLocalStorage({
+        lat: jsonValue[0].lat,
+        lon: jsonValue[0].lon,
+        name: jsonValue[0].name,
+    });
+    getCurrentWeather();
+    getAirPollution();
+    getWeatherAlerts();
+    previouslySearched();
 }
 
 // event listener that checks the location search field
@@ -162,6 +177,31 @@ locationSearch.addEventListener("keypress", (e) => {
     }
 });
 
+// contains the code used when the user types in the search bar and presses enter
+function search() {
+    let newCookieList = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("weatherAppCookie="))
+        ?.split("=")[1];
+
+    const locationSearch = getLonAndLatFromLocalStorage();
+
+    if (!newCookieList && locationSearch !== undefined) {
+        document.cookie = `weatherAppCookie={"name": "${locationSearch.name}", "lat": "${locationSearch.lat}", "lon": "${locationSearch.lon}"}`;
+    } else if (locationSearch !== undefined) {
+        if (!newCookieList.includes(locationSearch.name)) {
+            document.cookie = `weatherAppCookie={"name": "${locationSearch.name}", "lat": "${locationSearch.lat}", "lon": "${locationSearch.lon}"},${newCookieList}`;
+        }
+    }
+    getCurrentWeather();
+    getAirPollution();
+    getWeatherAlerts();
+    previouslySearched();
+    let forecastTitle = document.getElementById("forecastTitle");
+    forecastTitle.innerHTML = `${locationSearch.name} Forecast`;
+}
+
+// initialize places autocomplete
 async function initPlaces() {
     PlacesService = await google.maps.importLibrary("places");
 
@@ -187,30 +227,7 @@ async function initPlaces() {
     });
 }
 
-function search() {
-    let searchValue = document.getElementById("locationSearch");
-
-    let newCookieList = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("weatherAppCookie="))
-        ?.split("=")[1];
-
-    const locationSearch = getLonAndLatFromLocalStorage();
-    if (!newCookieList && locationSearch !== undefined) {
-        document.cookie = `weatherAppCookie=${locationSearch.name}`;
-    } else if (locationSearch !== undefined) {
-        if (!newCookieList.includes(locationSearch.name)) {
-            document.cookie = `weatherAppCookie=${locationSearch.name},${newCookieList}`;
-        }
-    }
-    getCurrentWeather();
-    getAirPollution();
-    getWeatherAlerts();
-    previouslySearched();
-    let forecastTitle = document.getElementById("forecastTitle");
-    forecastTitle.innerHTML = `${locationSearch.name} Forecast`;
-}
-
+// save lon and lat to local storage
 function saveLonAndLatToLocalStorage({ lat, lon, name }) {
     localStorage.setItem("lat", lat);
     localStorage.setItem("lon", lon);
@@ -384,12 +401,6 @@ async function saveFavorite() {
         });
 }
 
-window.onload = previouslySearched();
-window.onload = getWeatherAlerts();
-window.onload = getCurrentWeather();
-window.onload = getFavorites();
-window.onload = getAirPollution();
-
 function drawPollutionChart(data) {
     const ctx = document.getElementById("chart_canvas");
 
@@ -422,3 +433,9 @@ function drawPollutionChart(data) {
         },
     });
 }
+
+window.onload = previouslySearched();
+window.onload = getWeatherAlerts();
+window.onload = getCurrentWeather();
+window.onload = getFavorites();
+window.onload = getAirPollution();
