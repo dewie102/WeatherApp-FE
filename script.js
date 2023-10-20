@@ -83,7 +83,7 @@ function renderFavorites(element) {
             innerFavoriteDiv.classList.add("card-body");
             let favoriteTitle = document.createElement("h5");
             favoriteTitle.classList.add("card-title");
-            favoriteTitle.textContent = newLocation.locationName;
+            favoriteTitle.textContent = element.locationName;
             let locationTemp = document.createElement("p");
             locationTemp.classList.add("card-text");
             locationTemp.textContent = "Temp: " + newLocation.temp + "°F";
