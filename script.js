@@ -4,10 +4,10 @@ let backendURL = "https://weatherapp-085g.onrender.com";
 // let backend = "http://localhost:3000";
 
 function checkLogin() {
-  let loggedInCookie = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("weatherappLogin="))
-    ?.split("=")[1];
+    let loggedInCookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("weatherappLogin="))
+        ?.split("=")[1];
 
   if (loggedInCookie === undefined) {
     window.location.href = "./Login/loginPage.html";
@@ -23,9 +23,9 @@ function checkLogin() {
 
 // Get weatherApp cookies
 const cookieValue = document.cookie
-  .split("; ")
-  .find((row) => row.startsWith("weatherAppCookie="))
-  ?.split("=")[1];
+    .split("; ")
+    .find((row) => row.startsWith("weatherAppCookie="))
+    ?.split("=")[1];
 
 // get favorite
 async function getFavorites() {
@@ -115,174 +115,176 @@ function renderFavorites(element) {
 
 // Generate the list of previously searched zip codes
 function previouslySearched() {
-  let currentCookies = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("weatherAppCookie="))
-    ?.split("=")[1];
+    let currentCookies = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("weatherAppCookie="))
+        ?.split("=")[1];
 
-  if (currentCookies !== undefined) {
-    let previouslySearched = currentCookies.split(",");
-    const previouslySearchedDiv = document.getElementById(
-      "previouslySearchedDiv"
-    );
-    previouslySearchedDiv.replaceChildren();
-    previouslySearchedDiv.appendChild(document.createElement("h6"));
-    previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
-    for (let element of previouslySearched) {
-      let newLocation = document.createElement("button");
-      newLocation.classList.add("btn");
-      // newLocation.style.border = "solid";
-      newLocation.style.marginTop = "-10px";
-      newLocation.style.marginRight = "-4px";
-      newLocation.style.padding = "3px";
-      newLocation.onclick = `${console.log("test")}`;
-      newLocation.classList.add("text-decoration-underline");
-      newLocation.classList.add("search-history");
-      newLocation.value = element;
-      newLocation.setAttribute("onclick", "getCurrentWeather()");
-      newLocation.textContent = element;
-      previouslySearchedDiv.appendChild(newLocation);
+    if (currentCookies !== undefined) {
+        let previouslySearched = currentCookies.split(",");
+        const previouslySearchedDiv = document.getElementById(
+            "previouslySearchedDiv"
+        );
+        previouslySearchedDiv.replaceChildren();
+        previouslySearchedDiv.appendChild(document.createElement("h6"));
+        previouslySearchedDiv.lastChild.textContent = "Previous Searches:";
+        for (let element of previouslySearched) {
+            let newLocation = document.createElement("button");
+            newLocation.classList.add("btn");
+            // newLocation.style.border = "solid";
+            newLocation.style.marginTop = "-10px";
+            newLocation.style.marginRight = "-4px";
+            newLocation.style.padding = "3px";
+            newLocation.onclick = `${console.log("test")}`;
+            newLocation.classList.add("text-decoration-underline");
+            newLocation.classList.add("search-history");
+            newLocation.value = element;
+            newLocation.setAttribute("onclick", "getCurrentWeather()");
+            newLocation.textContent = element;
+            previouslySearchedDiv.appendChild(newLocation);
+        }
     }
-  }
 }
 
 // event listener that checks the location search field
 locationSearch.addEventListener("keypress", (e) => {
-  let searchValue = document.getElementById("locationSearch");
+    let searchValue = document.getElementById("locationSearch");
 
-  let newCookieList = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("weatherAppCookie="))
-    ?.split("=")[1];
+    let newCookieList = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("weatherAppCookie="))
+        ?.split("=")[1];
 
-  if (e.key === "Enter") {
-    const locationSearch = getLonAndLatFromLocalStorage();
-    if (!newCookieList && locationSearch !== undefined) {
-      document.cookie = `weatherAppCookie=${locationSearch.name}`;
-    } else if (locationSearch !== undefined) {
-      if (!newCookieList.includes(locationSearch.name)) {
-        document.cookie = `weatherAppCookie=${locationSearch.name},${newCookieList}`;
-      }
+    if (e.key === "Enter") {
+        const locationSearch = getLonAndLatFromLocalStorage();
+        if (!newCookieList && locationSearch !== undefined) {
+            document.cookie = `weatherAppCookie=${locationSearch.name}`;
+        } else if (locationSearch !== undefined) {
+            if (!newCookieList.includes(locationSearch.name)) {
+                document.cookie = `weatherAppCookie=${locationSearch.name},${newCookieList}`;
+            }
+        }
+        getCurrentWeather();
+        getAirPollution();
+        getWeatherAlerts();
+        previouslySearched();
+        let forecastTitle = document.getElementById("forecastTitle");
+        forecastTitle.innerHTML = `${locationSearch.name} Forecast`;
     }
-    getCurrentWeather();
-    getAirPollution();
-    getWeatherAlerts();
-    previouslySearched();
-    let forecastTitle = document.getElementById("forecastTitle");
-    forecastTitle.innerHTML = `${locationSearch.name} Forecast`;
-  }
 });
 
 async function initPlaces() {
-  PlacesService = await google.maps.importLibrary("places");
+    PlacesService = await google.maps.importLibrary("places");
 
-  const options = {
-    componentRestrictions: { country: "us" },
-    fields: ["address_components", "geometry", "icon", "name"],
-  };
+    const options = {
+        componentRestrictions: { country: "us" },
+        fields: ["address_components", "geometry", "icon", "name"],
+    };
 
-  const autocomplete = new PlacesService.Autocomplete(
-    document.getElementById("locationSearch"),
-    options
-  );
+    const autocomplete = new PlacesService.Autocomplete(
+        document.getElementById("locationSearch"),
+        options
+    );
 
-  google.maps.event.addListener(autocomplete, "place_changed", () => {
-    let place = autocomplete.getPlace();
-    saveLonAndLatToLocalStorage({
-      lat: place.geometry.location.lat(),
-      lon: place.geometry.location.lng(),
-      name: place.name,
+    google.maps.event.addListener(autocomplete, "place_changed", () => {
+        let place = autocomplete.getPlace();
+        saveLonAndLatToLocalStorage({
+            lat: place.geometry.location.lat(),
+            lon: place.geometry.location.lng(),
+            name: place.name,
+        });
     });
-  });
 }
 
 function saveLonAndLatToLocalStorage({ lat, lon, name }) {
-  localStorage.setItem("lat", lat);
-  localStorage.setItem("lon", lon);
-  localStorage.setItem("name", name);
+    localStorage.setItem("lat", lat);
+    localStorage.setItem("lon", lon);
+    localStorage.setItem("name", name);
 }
 
 // get lon and lat from local storage
 function getLonAndLatFromLocalStorage() {
-  const lat = localStorage.getItem("lat");
-  const lon = localStorage.getItem("lon");
-  const name = localStorage.getItem("name");
+    const lat = localStorage.getItem("lat");
+    const lon = localStorage.getItem("lon");
+    const name = localStorage.getItem("name");
 
-  return { lat, lon, name };
+    return { lat, lon, name };
 }
 
 // get current weather (Only returns the current weather)
 async function getCurrentWeather() {
-  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
-  const response = await fetch(
-    `${backendURL}/api/weatherapp/openweather?lat=${lat}&lon=${lon}`
-  );
-  const data = await response.json();
-  createWeatherCard([data[0]]);
-  let forecastTitle = document.getElementById("forecastTitle");
-  forecastTitle.innerHTML = `${name} Forecast`;
+    const { lat, lon, name } = await getLonAndLatFromLocalStorage();
+    const response = await fetch(
+        `${backendURL}/api/weatherapp/openweather?lat=${lat}&lon=${lon}`
+    );
+    const data = await response.json();
+    createWeatherCard([data[0]]);
+    let forecastTitle = document.getElementById("forecastTitle");
+    forecastTitle.innerHTML = `${name} Forecast`;
 }
 
 // get air pollution
 async function getAirPollution() {
-  const { lat, lon } = await getLonAndLatFromLocalStorage();
-  let airQualityDiv = document.getElementById("airQualityDiv");
+    const { lat, lon } = await getLonAndLatFromLocalStorage();
+    let airQualityDiv = document.getElementById("airQualityDiv");
 
-  const response = await fetch(
-    `${backendURL}/api/weatherapp/openweather/airpollution?lat=${lat}&lon=${lon}`
-  );
-  const data = await response.json();
-  let qualityText = document.createElement("h2");
-  let qualityTitle = document.createElement("h1");
-  qualityText.classList.add("text-center");
-  qualityText.textContent = `${data.airPollution}`;
-  airQualityDiv.replaceChildren();
-  airQualityDiv.appendChild(qualityTitle);
-  qualityTitle.classList.add("text-center");
-  qualityTitle.textContent = "Air Quality";
-  airQualityDiv.appendChild(qualityText);
+    const response = await fetch(
+        `${backendURL}/api/weatherapp/openweather/airpollution?lat=${lat}&lon=${lon}`
+    );
+    const data = await response.json();
+    let qualityText = document.createElement("h2");
+    let qualityTitle = document.createElement("h1");
+    qualityText.classList.add("text-center");
+    qualityText.textContent = `${data.airPollution}`;
+    airQualityDiv.replaceChildren();
+    airQualityDiv.appendChild(qualityTitle);
+    qualityTitle.classList.add("text-center");
+    qualityTitle.textContent = "Air Quality";
+    airQualityDiv.appendChild(qualityText);
+
+    drawPollutionChart(data);
 }
 
 // create weather card
 function createWeatherCard(content) {
-  mainWeatherDiv.replaceChildren();
-  for (let element of content) {
-    let weatherCard = document.createElement("div");
-    weatherCard.classList.add("card");
-    weatherCard.style.width = "18rem";
-    let weatherCardImg = document.createElement("img");
-    weatherCardImg.classList.add("card-img-top");
-    weatherCardImg.src = element.iconUrl;
-    weatherCardImg.alt = "weather icon";
-    weatherCard.appendChild(weatherCardImg);
-    let mainWeatherDiv = document.getElementById("mainWeatherDiv");
-    let weatherCardBody = document.createElement("div");
-    weatherCardBody.classList.add("card-body");
-    weatherCardBody.innerHTML = `
+    mainWeatherDiv.replaceChildren();
+    for (let element of content) {
+        let weatherCard = document.createElement("div");
+        weatherCard.classList.add("card");
+        weatherCard.style.width = "18rem";
+        let weatherCardImg = document.createElement("img");
+        weatherCardImg.classList.add("card-img-top");
+        weatherCardImg.src = element.iconUrl;
+        weatherCardImg.alt = "weather icon";
+        weatherCard.appendChild(weatherCardImg);
+        let mainWeatherDiv = document.getElementById("mainWeatherDiv");
+        let weatherCardBody = document.createElement("div");
+        weatherCardBody.classList.add("card-body");
+        weatherCardBody.innerHTML = `
     <hr/>
     <p>Temp: ${element.temp}</p>
     <p>Wind Speed: ${element.windSpeed}</p>
     <p>Humidity: ${element.humidity}</p>
     `;
-    weatherCard.appendChild(weatherCardBody);
-    mainWeatherDiv.appendChild(weatherCard);
-  }
+        weatherCard.appendChild(weatherCardBody);
+        mainWeatherDiv.appendChild(weatherCard);
+    }
 }
 
 // get weather alerts
 async function getWeatherAlerts() {
-  await fetch(`${backendURL}/api/weatherapp/nationalalerts?count=5`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      for (let element of data) {
-        if (element.headline != null) {
-          let newTableRow = document.createElement("tr");
-          newTableRow.innerHTML = `
+    await fetch(`${backendURL}/api/weatherapp/nationalalerts?count=5`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            for (let element of data) {
+                if (element.headline != null) {
+                    let newTableRow = document.createElement("tr");
+                    newTableRow.innerHTML = `
           <td>${element.alertType}</td>
           <td>${element.effective}</td>
           <td>${element.expires}</td>
@@ -290,32 +292,35 @@ async function getWeatherAlerts() {
           <td>${element.headline}</td>
           <td>${element.description}</td>
           `;
-          alertTableBody.appendChild(newTableRow);
-        }
-      }
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
+                    alertTableBody.appendChild(newTableRow);
+                }
+            }
+        })
+        .catch((error) => {
+            console.error(
+                "There was a problem with the fetch operation:",
+                error
+            );
+        });
 }
 
 // get hourly forecast
 async function getHourlyForecast() {
-  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
-  const response = await fetch(
-    `${backendURL}/api/weatherapp/openweather/forecast?lat=${lat}&lon=${lon}&count=5`
-  );
-  const data = await response.json();
-  createWeatherCard(data);
-  let forecastTitle = document.getElementById("forecastTitle");
-  forecastTitle.innerHTML = `${name} Forecast`;
+    const { lat, lon, name } = await getLonAndLatFromLocalStorage();
+    const response = await fetch(
+        `${backendURL}/api/weatherapp/openweather/forecast?lat=${lat}&lon=${lon}&count=5`
+    );
+    const data = await response.json();
+    createWeatherCard(data);
+    let forecastTitle = document.getElementById("forecastTitle");
+    forecastTitle.innerHTML = `${name} Forecast`;
 }
 
 // log of
 function logOff() {
-  document.cookie =
-    "weatherappLogin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  window.location.href = "./Login/loginPage.html";
+    document.cookie =
+        "weatherappLogin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.href = "./Login/loginPage.html";
 }
 
 // save favorite
@@ -351,12 +356,42 @@ async function saveFavorite() {
       alert(`Successfully added ${name} to favorites!`);
       renderFavorites(content);
     })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+        .catch((error) => {
+            console.error("Error:", error);
+        });
 }
 
 window.onload = previouslySearched();
 window.onload = getWeatherAlerts();
 window.onload = getCurrentWeather();
 window.onload = getFavorites();
+
+
+function drawPollutionChart(data) {
+    const ctx = document.getElementById("chart_canvas");
+
+    const labels = Object.keys(data).filter((e) => e !== "airPollution");
+    const values = Object.values(data).slice(0, -1);
+
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Pollutant concentration in μg/m3",
+                    data: values,
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true,
+                },
+            },
+            indexAxis: "y",
+        },
+    });
+}
