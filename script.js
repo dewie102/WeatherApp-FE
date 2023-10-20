@@ -394,7 +394,7 @@ async function saveFavorite() {
                 );
             }
             alert(`Successfully added ${name} to favorites!`);
-            renderFavorites(content);
+            renderFavorites(favoriteData);
         })
         .catch((error) => {
             console.error("Error:", error);
