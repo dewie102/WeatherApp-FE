@@ -9,16 +9,16 @@ function checkLogin() {
         .find((row) => row.startsWith("weatherappLogin="))
         ?.split("=")[1];
 
-  if (loggedInCookie === undefined) {
-    window.location.href = "./Login/loginPage.html";
-  }
-  let navButton = document.createElement("button");
-  navButton.classList.add("btn");
-  navButton.classList.add("btn-outline-warning");
-  navButton.type = "submit";
-  navButton.setAttribute("onclick", "logOff()");
-  navButton.textContent = "Log Off";
-  navBarButton.appendChild(navButton);
+    if (loggedInCookie === undefined) {
+        window.location.href = "./Login/loginPage.html";
+    }
+    let navButton = document.createElement("button");
+    navButton.classList.add("btn");
+    navButton.classList.add("btn-outline-warning");
+    navButton.type = "submit";
+    navButton.setAttribute("onclick", "logOff()");
+    navButton.textContent = "Log Off";
+    navBarButton.appendChild(navButton);
 }
 
 // Get weatherApp cookies
@@ -29,88 +29,89 @@ const cookieValue = document.cookie
 
 // get favorite
 async function getFavorites() {
-  let userCookie = JSON.parse(
-    document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("weatherappLogin="))
-      ?.split("=")[1]
-  );
+    let userCookie = JSON.parse(
+        document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("weatherappLogin="))
+            ?.split("=")[1]
+    );
 
-  await fetch(
-    `${backendURL}/api/weatherapp/getfavorites?id=${userCookie.user.id}&token=${userCookie.token}`
-  )
-    .then((response) => response.json())
-    .then((content) => {
-      if (Object.hasOwn(content, "error")) {
-        return alert(`Failed to get the user's favorites`);
-      }
-      const favoriteList = content.favorites;
+    await fetch(
+        `${backendURL}/api/weatherapp/getfavorites?id=${userCookie.user.id}&token=${userCookie.token}`
+    )
+        .then((response) => response.json())
+        .then((content) => {
+            if (Object.hasOwn(content, "error")) {
+                return alert(`Failed to get the user's favorites`);
+            }
+            const favoriteList = content.favorites;
 
-      let mainFavoriteDiv = document.getElementById("favoritesDiv");
-      let mainFavoriteTitle = document.createElement("h1");
-      let line = document.createElement("hr");
-      mainFavoriteTitle.textContent = "Favorites";
-      mainFavoriteTitle.classList.add("text-center");
-      mainFavoriteDiv.appendChild(mainFavoriteTitle);
-      mainFavoriteDiv.appendChild(line);
+            let mainFavoriteDiv = document.getElementById("favoritesDiv");
+            let mainFavoriteTitle = document.createElement("h1");
+            let line = document.createElement("hr");
+            mainFavoriteTitle.textContent = "Favorites";
+            mainFavoriteTitle.classList.add("text-center");
+            mainFavoriteDiv.appendChild(mainFavoriteTitle);
+            mainFavoriteDiv.appendChild(line);
 
-      for (let element of favoriteList) {
-        renderFavorites(element);
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+            for (let element of favoriteList) {
+                renderFavorites(element);
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
 }
 
 function renderFavorites(element) {
-  let mainFavoriteDiv = document.getElementById("favoritesDiv");
-  console.log(element);
+    let mainFavoriteDiv = document.getElementById("favoritesDiv");
+    console.log(element);
 
-  fetch(
-    `${backendURL}/api/weatherapp/openweather?lat=${element.lat}&lon=${element.lon}`
-  )
-    .then((response) => response.json())
-    .then((content) => {
-      let newLocation = content[0];
+    fetch(
+        `${backendURL}/api/weatherapp/openweather?lat=${element.lat}&lon=${element.lon}`
+    )
+        .then((response) => response.json())
+        .then((content) => {
+            let newLocation = content[0];
 
-      let newFavorite = document.createElement("div");
-      newFavorite.classList.add("card");
-      newFavorite.style.width = "12rem";
-      newFavorite.style.height = "20rem";
-      let newFavoriteImg = document.createElement("img");
-      newFavoriteImg.style.width = "12rem";
-      newFavoriteImg.style.height = "10rem";
+            let newFavorite = document.createElement("div");
+            newFavorite.classList.add("card");
+            newFavorite.style.width = "12rem";
+            newFavorite.style.height = "20rem";
+            let newFavoriteImg = document.createElement("img");
+            newFavoriteImg.style.width = "12rem";
+            newFavoriteImg.style.height = "10rem";
 
-      newFavoriteImg.classList.add("card-img-top");
-      newFavoriteImg.src = "https://placehold.jp/25x25.png";
-      newFavoriteImg.alt = "Favorite";
-      let innerFavoriteDiv = document.createElement("div");
-      innerFavoriteDiv.classList.add("card-body");
-      let favoriteTitle = document.createElement("h5");
-      favoriteTitle.classList.add("card-title");
-      favoriteTitle.textContent = newLocation.locationName;
-      let locationTemp = document.createElement("p");
-      locationTemp.classList.add("card-text");
-      locationTemp.textContent = "Temp: " + newLocation.temp + "°F";
-      let locationWind = document.createElement("p");
-      locationWind.classList.add("card-text");
-      locationWind.textContent = "Wind: " + newLocation.windSpeed + "°F";
-      let locationHumidity = document.createElement("p");
-      locationHumidity.classList.add("card-text");
-      locationHumidity.textContent = "Humidity: " + newLocation.humidity + "°F";
+            newFavoriteImg.classList.add("card-img-top");
+            newFavoriteImg.src = "https://placehold.jp/25x25.png";
+            newFavoriteImg.alt = "Favorite";
+            let innerFavoriteDiv = document.createElement("div");
+            innerFavoriteDiv.classList.add("card-body");
+            let favoriteTitle = document.createElement("h5");
+            favoriteTitle.classList.add("card-title");
+            favoriteTitle.textContent = newLocation.locationName;
+            let locationTemp = document.createElement("p");
+            locationTemp.classList.add("card-text");
+            locationTemp.textContent = "Temp: " + newLocation.temp + "°F";
+            let locationWind = document.createElement("p");
+            locationWind.classList.add("card-text");
+            locationWind.textContent = "Wind: " + newLocation.windSpeed + "°F";
+            let locationHumidity = document.createElement("p");
+            locationHumidity.classList.add("card-text");
+            locationHumidity.textContent =
+                "Humidity: " + newLocation.humidity + "°F";
 
-      newFavorite.appendChild(newFavoriteImg);
-      newFavorite.appendChild(innerFavoriteDiv);
-      innerFavoriteDiv.appendChild(favoriteTitle);
-      innerFavoriteDiv.appendChild(locationTemp);
-      innerFavoriteDiv.appendChild(locationWind);
-      innerFavoriteDiv.appendChild(locationHumidity);
-      mainFavoriteDiv.appendChild(newFavorite);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+            newFavorite.appendChild(newFavoriteImg);
+            newFavorite.appendChild(innerFavoriteDiv);
+            innerFavoriteDiv.appendChild(favoriteTitle);
+            innerFavoriteDiv.appendChild(locationTemp);
+            innerFavoriteDiv.appendChild(locationWind);
+            innerFavoriteDiv.appendChild(locationHumidity);
+            mainFavoriteDiv.appendChild(newFavorite);
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
 }
 
 // Generate the list of previously searched zip codes
@@ -204,9 +205,15 @@ function saveLonAndLatToLocalStorage({ lat, lon, name }) {
 
 // get lon and lat from local storage
 function getLonAndLatFromLocalStorage() {
-    const lat = localStorage.getItem("lat");
-    const lon = localStorage.getItem("lon");
-    const name = localStorage.getItem("name");
+    let lat = localStorage.getItem("lat");
+    let lon = localStorage.getItem("lon");
+    let name = localStorage.getItem("name");
+
+    if (!lat || !lon) {
+        lat = "40.7128";
+        lon = "-74.0060";
+        name = "New York";
+    }
 
     return { lat, lon, name };
 }
@@ -325,37 +332,39 @@ function logOff() {
 
 // save favorite
 async function saveFavorite() {
-  let userCookie = JSON.parse(
-    document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("weatherappLogin="))
-      ?.split("=")[1]
-  );
+    let userCookie = JSON.parse(
+        document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("weatherappLogin="))
+            ?.split("=")[1]
+    );
 
-  const { lat, lon, name } = await getLonAndLatFromLocalStorage();
+    const { lat, lon, name } = await getLonAndLatFromLocalStorage();
 
-  let favoriteData = {
-    id: userCookie.user.id,
-    token: userCookie.token,
-    name: name,
-    lat: lat,
-    lon: lon,
-  };
-  await fetch(`${backendURL}/api/weatherapp/updatefavorites`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(favoriteData),
-  })
-    .then((response) => response.json())
-    .then((content) => {
-      if (Object.hasOwn(content, "error")) {
-        return alert(`Failed to add ${name} to favorites. ${content.error}`);
-      }
-      alert(`Successfully added ${name} to favorites!`);
-      renderFavorites(content);
+    let favoriteData = {
+        id: userCookie.user.id,
+        token: userCookie.token,
+        name: name,
+        lat: lat,
+        lon: lon,
+    };
+    await fetch(`${backendURL}/api/weatherapp/updatefavorites`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(favoriteData),
     })
+        .then((response) => response.json())
+        .then((content) => {
+            if (Object.hasOwn(content, "error")) {
+                return alert(
+                    `Failed to add ${name} to favorites. ${content.error}`
+                );
+            }
+            alert(`Successfully added ${name} to favorites!`);
+            renderFavorites(content);
+        })
         .catch((error) => {
             console.error("Error:", error);
         });
@@ -365,7 +374,7 @@ window.onload = previouslySearched();
 window.onload = getWeatherAlerts();
 window.onload = getCurrentWeather();
 window.onload = getFavorites();
-
+window.onload = getAirPollution();
 
 function drawPollutionChart(data) {
     const ctx = document.getElementById("chart_canvas");
