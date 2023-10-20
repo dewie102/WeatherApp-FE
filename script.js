@@ -2,7 +2,7 @@ checkLogin();
 let chart;
 let PlacesService;
 let backendURL = "https://weatherapp-085g.onrender.com";
-// let backendURL = "http://localhost:3000";
+//let backendURL = "http://localhost:3000";
 
 function checkLogin() {
     let loggedInCookie = document.cookie
@@ -30,13 +30,14 @@ const cookieValue = document.cookie
 
 // get a photo for each favorite
 async function getLocationPhoto(location, htmlLocation) {
-    await fetch(`${backendURL}/api/weatherapp/photo?location=${location}`)
+    await fetch(
+        `${backendURL}/api/weatherapp/unsplash/photo?location=${location}`
+    )
         .then((response) => response.json())
         .then((content) => {
             if (Object.hasOwn(content, "url")) {
                 htmlLocation.src = content.url;
             } else {
-                console.log(content);
                 htmlLocation.src = "https://placehold.jp/100x100.png";
             }
         })
@@ -396,7 +397,11 @@ async function saveFavorite() {
                 );
             }
             alert(`Successfully added ${name} to favorites!`);
-            renderFavorites(favoriteData);
+            renderFavorites({
+                locationName: favoriteData.name,
+                lat: favoriteData.lat,
+                lon: favoriteData.lon,
+            });
         })
         .catch((error) => {
             console.error("Error:", error);
