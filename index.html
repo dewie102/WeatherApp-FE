@@ -10,25 +10,6 @@
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
-    <script>
-      window.myWidgetParam ? window.myWidgetParam : (window.myWidgetParam = []);
-      window.myWidgetParam.push({
-        id: 17,
-        cityid: "2643743",
-        appid: "a1d76b3de9177c713320915a8f8e405a",
-        units: "metric",
-        containerid: "openweathermap-widget-17",
-      });
-      (function () {
-        var script = document.createElement("script");
-        script.async = true;
-        script.charset = "utf-8";
-        script.src =
-          "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(script, s);
-      })();
-    </script>
     <link rel="stylesheet" href="styles.css" />
     <!--TODO: check if the user is logged in if not direct them to the login page -->
     <script>
@@ -39,11 +20,6 @@
         window.location.href = "login/loginPage.html";
       }
     </script>
-    <!-- <script
-      type="text/javascript"
-      src="https://www.gstatic.com/charts/loader.js"
-    ></script> -->
-    <!-- <script src="./javascript/pollutionChart.js"></script> -->
     <title>WeatherApp</title>
   </head>
   <body>
@@ -86,10 +62,7 @@
           </button>
         </div>
       </div>
-      <div id="favoritesDiv" class="favoriteDiv">
-        <h1 class="text-center">Favorites</h1>
-        <hr />
-      </div>
+      <div id="favoritesDiv" class="favoriteDiv"></div>
       <div id="mainView d-flex" class="mainViewDiv">
         <h1 id="forecastTitle" class="text-center"></h1>
         <hr />
