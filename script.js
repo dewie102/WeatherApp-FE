@@ -133,8 +133,6 @@ function renderFavorites(element) {
 }
 
 async function deleteFavorite(evt) {
-    console.log(evt.target);
-
     let userCookie = JSON.parse(
         document.cookie
             .split("; ")
@@ -149,8 +147,6 @@ async function deleteFavorite(evt) {
         token: userCookie.token,
         name: card.querySelector("#favorite-title").innerText,
     };
-
-    console.log(favoriteData);
 
     const response = await fetch(
         `${backendURL}/api/weatherapp/deletefavorite`,
@@ -167,8 +163,6 @@ async function deleteFavorite(evt) {
     if (Object.hasOwn(content, "error")) {
         console.log(content);
     }
-
-    console.log(card);
     card.remove();
 }
 
