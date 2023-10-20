@@ -1,8 +1,8 @@
 checkLogin();
 let chart;
 let PlacesService;
-let backendURL = "https://weatherapp-085g.onrender.com";
-// let backend = "http://localhost:3000";
+// let backendURL = "https://weatherapp-085g.onrender.com";
+let backendURL = "http://localhost:3000";
 
 function checkLogin() {
     let loggedInCookie = document.cookie
@@ -27,6 +27,17 @@ const cookieValue = document.cookie
     .split("; ")
     .find((row) => row.startsWith("weatherAppCookie="))
     ?.split("=")[1];
+
+function getLocationPhoto(location, htmlLocation) {
+    fetch(`${backendURL}/api/weatherapp/photo?location=${location}`)
+        .then((response) => response.json())
+        .then((content) => {
+            htmlLocation.src = content.url;
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+}
 
 // get favorite
 async function getFavorites() {
@@ -77,7 +88,10 @@ function renderFavorites(element) {
             newFavoriteImg.style.height = "10rem";
 
             newFavoriteImg.classList.add("card-img-top");
-            newFavoriteImg.src = "https://placehold.jp/25x25.png";
+            newFavoriteImg.src = getLocationPhoto(
+                element.locationName,
+                newFavoriteImg
+            );
             newFavoriteImg.alt = "Favorite";
             let innerFavoriteDiv = document.createElement("div");
             innerFavoriteDiv.classList.add("card-body");
