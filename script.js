@@ -33,7 +33,12 @@ async function getLocationPhoto(location, htmlLocation) {
     await fetch(`${backendURL}/api/weatherapp/photo?location=${location}`)
         .then((response) => response.json())
         .then((content) => {
-            htmlLocation.src = content.url;
+            if (Object.hasOwn(content, "url")) {
+                htmlLocation.src = content.url;
+            } else {
+                console.log(content);
+                htmlLocation.src = "https://placehold.jp/100x100.png";
+            }
         })
         .catch((error) => {
             console.error("Error:", error);
@@ -88,10 +93,7 @@ function renderFavorites(element) {
             newFavoriteImg.style.height = "10rem";
 
             newFavoriteImg.classList.add("card-img-top");
-            newFavoriteImg.src = getLocationPhoto(
-                element.locationName,
-                newFavoriteImg
-            );
+            getLocationPhoto(element.locationName, newFavoriteImg);
             newFavoriteImg.alt = "Favorite";
             let innerFavoriteDiv = document.createElement("div");
             innerFavoriteDiv.classList.add("card-body");
