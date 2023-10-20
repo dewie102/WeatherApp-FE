@@ -1,8 +1,8 @@
 checkLogin();
 let chart;
 let PlacesService;
-//let backendURL = "https://weatherapp-085g.onrender.com";
-let backendURL = "http://localhost:3000";
+let backendURL = "https://weatherapp-085g.onrender.com";
+//let backendURL = "http://localhost:3000";
 
 function checkLogin() {
     let loggedInCookie = document.cookie
