@@ -1,8 +1,8 @@
 checkLogin();
 let chart;
 let PlacesService;
-let backendURL = "https://weatherapp-085g.onrender.com";
-//let backendURL = "http://localhost:3000";
+//let backendURL = "https://weatherapp-085g.onrender.com";
+let backendURL = "http://localhost:3000";
 
 function checkLogin() {
     let loggedInCookie = document.cookie
@@ -88,7 +88,7 @@ function renderFavorites(element) {
             newFavorite.style.marginRight = "10px";
             newFavorite.classList.add("card");
             newFavorite.style.width = "12rem";
-            newFavorite.style.height = "20rem";
+            newFavorite.style.height = "25rem";
             let newFavoriteImg = document.createElement("img");
             newFavoriteImg.style.width = "12rem";
             newFavoriteImg.style.height = "10rem";
@@ -101,6 +101,7 @@ function renderFavorites(element) {
             let favoriteTitle = document.createElement("h5");
             favoriteTitle.classList.add("card-title");
             favoriteTitle.textContent = element.locationName;
+            favoriteTitle.id = "favorite-title";
             let locationTemp = document.createElement("p");
             locationTemp.classList.add("card-text");
             locationTemp.textContent = "Temp: " + newLocation.temp + "°F";
@@ -111,6 +112,11 @@ function renderFavorites(element) {
             locationHumidity.classList.add("card-text");
             locationHumidity.textContent =
                 "Humidity: " + newLocation.humidity + "°F";
+            let deleteButton = document.createElement("button");
+            deleteButton.classList.add("btn");
+            deleteButton.classList.add("btn-danger");
+            deleteButton.innerText = "Delete";
+            deleteButton.addEventListener("click", deleteFavorite);
 
             newFavorite.appendChild(newFavoriteImg);
             newFavorite.appendChild(innerFavoriteDiv);
@@ -118,11 +124,62 @@ function renderFavorites(element) {
             innerFavoriteDiv.appendChild(locationTemp);
             innerFavoriteDiv.appendChild(locationWind);
             innerFavoriteDiv.appendChild(locationHumidity);
+            innerFavoriteDiv.appendChild(deleteButton);
             mainFavoriteDiv.appendChild(newFavorite);
         })
         .catch((error) => {
             console.error("Error:", error);
         });
+}
+
+async function deleteFavorite(evt) {
+    console.log(evt.target);
+
+    let userCookie = JSON.parse(
+        document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("weatherappLogin="))
+            ?.split("=")[1]
+    );
+
+    const card = findParentElement(evt.target, "card");
+
+    let favoriteData = {
+        id: userCookie.user.id,
+        token: userCookie.token,
+        name: card.querySelector("#favorite-title").innerText,
+    };
+
+    console.log(favoriteData);
+
+    const response = await fetch(
+        `${backendURL}/api/weatherapp/deletefavorite`,
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(favoriteData),
+        }
+    );
+
+    const content = await response.json();
+    if (Object.hasOwn(content, "error")) {
+        console.log(content);
+    }
+
+    console.log(card);
+    card.remove();
+}
+
+function findParentElement(currentElement, parentClass) {
+    if (currentElement.classList.contains(parentClass)) {
+        return currentElement;
+    } else if (currentElement === document.body) {
+        return null;
+    } else {
+        return findParentElement(currentElement.parentElement, parentClass);
+    }
 }
 
 // Generate the list of previously searched zip codes
